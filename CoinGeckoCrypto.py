@@ -4,7 +4,7 @@ from tkinter import messagebox as mb
 from PIL import Image, ImageTk
 import requests
 from io import BytesIO
-
+import pprint
 
 # Функция для получения списка криптовалют с сортировкой по рыночной капитализации
 def get_crypto_market_data():
@@ -12,9 +12,9 @@ def get_crypto_market_data():
         response = requests.get("https://api.coingecko.com/api/v3/coins/markets", params={
             "vs_currency": "usd",
             "order": "market_cap_desc",
-            "per_page": 1000,  # Получаем сразу 1000 криптовалют
+            "per_page": 100,
             "page": 1
-        })
+        })  # Получаем сразу 100 криптовалют
         response.raise_for_status()
         return response.json()
     except Exception as e:
@@ -49,9 +49,11 @@ def update_crypto_price_and_market_cap(event=None):
 
 # Функция для обновления списка криптовалют по выбранной группе
 def update_crypto_list(event):
+    print(group_combobox.get())
     group = int(group_combobox.get()) - 1
-    start = group * 50
-    end = start + 50
+
+    start = group * 10
+    end = start + 10
     crypto_names = [crypto["name"] for crypto in coins[start:end]]
     crypto_ids = [crypto["id"] for crypto in coins[start:end]]
     crypto_market_caps = [crypto["market_cap"] for crypto in coins[start:end]]
@@ -59,7 +61,7 @@ def update_crypto_list(event):
 
     # Обновляем выпадающий список с криптовалютами и сохраняем данные
     crypto_combobox["values"] = crypto_names
-    crypto_combobox.current(0)
+    # crypto_combobox.current(0)
     crypto_combobox_ids.clear()
     crypto_combobox_ids.extend(crypto_ids)
     crypto_combobox_market_caps.clear()
@@ -67,8 +69,16 @@ def update_crypto_list(event):
     crypto_combobox_images.clear()
     crypto_combobox_images.extend(crypto_images)
 
-    # Обновляем цену, рыночную капитализацию и изображение для первой криптовалюты в группе
-    update_crypto_price_and_market_cap()
+    # Устанавливаем первый элемент как выбранный, если список не пустой
+    if crypto_names:
+        crypto_combobox.current(0)
+        # Обновляем цену, рыночную капитализацию и изображение для первой криптовалюты в группе
+        update_crypto_price_and_market_cap()
+    else:
+        # Очищаем данные, если список пуст
+        price_label.config(text="Курс: ")
+        market_cap_label.config(text="Рыночная капитализация: ")
+        image_label.config(image="")
 
 
 
@@ -90,14 +100,18 @@ root.geometry("350x370")
 
 # Получаем список криптовалют
 coins = get_crypto_market_data()
+p = pprint.PrettyPrinter(indent=2)
+p.pprint(coins)
+
+
 crypto_combobox_ids = []
 crypto_combobox_market_caps = []
 crypto_combobox_images = []
 
 # Выпадающий список для выбора группы
-group_label = tk.Label(root, text="Выберите группу (1-20):")
+group_label = tk.Label(root, text="Выберите группу (1-10):")
 group_label.pack()
-group_combobox = ttk.Combobox(root, values=[str(i) for i in range(1, 21)], state="readonly")
+group_combobox = ttk.Combobox(root, values=[str(i) for i in range(1, 11)], state="readonly")
 group_combobox.current(0)
 group_combobox.pack()
 group_combobox.bind("<<ComboboxSelected>>", update_crypto_list)
@@ -136,3 +150,11 @@ root.mainloop()
 Эта версия программы будет корректно отображать как курс и рыночную капитализацию, так и изображение выбранной криптовалюты.
 """
 
+"""
+сделай в последнем листинге, где использовалась функция update_crypto_image исправления в функции "update_crypto_list" так как происходит ошибка при выборе группы криптовалют на строке crypto_combobox.current(0). 
+Текст ошибки:
+File "/usr/lib/python3.10/tkinter/ttk.py", line 712, in current
+    return self.tk.call(self._w, "current", newindex)
+_tkinter.TclError: Index 0 out of range
+
+"""
