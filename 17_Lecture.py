@@ -1,5 +1,6 @@
 import requests
 from tkinter import *
+from tkinter import ttk
 from PIL import Image, ImageTk
 from io import BytesIO
 from tkinter import messagebox as mb
@@ -18,10 +19,17 @@ def get_image(url_api):
 
 
 def set_image():
-    img = get_image(url)
+    tag = i_tag.get()
+    url = "https://cataas.com/cat"
+    url_tag = f"https://cataas.com/cat/{tag}"
+    img = get_image(url_tag if tag else url)
 
     if img:
-        label.config(image=img)
+        new_window = Toplevel()
+        new_window.title("Картинка с котиком")
+        new_window.geometry("550x500")
+        l = Label(new_window, image=img)
+        l.pack()
         label.image = img
 
 
@@ -29,10 +37,11 @@ def exit_win():
     window.destroy()
 
 
-url = "https://cataas.com/cat"
+sp_tags = ["sleep", "orange", "black", "cute", "smile", "fat", "circle"]
 
 window =Tk()
-window.geometry("600x600")
+window.title("Главное окно")
+window.geometry("300x100")
 
 label = Label(window)
 label.pack()
@@ -48,5 +57,14 @@ main_menu.add_cascade(label="Файл", menu=file_menu)
 file_menu.add_command(label="Получить котика", command=set_image)
 file_menu.add_separator()
 file_menu.add_command(label="Выход", command=exit_win)
+
+lab = Label(window, text="Выберите тэг: ")
+lab.pack()
+
+# i_tag = Entry(window, font=("Arial", 15))
+# i_tag.pack()
+
+i_tag = ttk.Combobox(window, values=sp_tags)
+i_tag.pack()
 
 window.mainloop()
