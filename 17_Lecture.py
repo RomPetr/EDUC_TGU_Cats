@@ -30,7 +30,7 @@ def set_image():
         new_window.geometry("550x500")
         l = Label(new_window, image=img)
         l.pack()
-        label.image = img
+        l.image = img
 
 
 def exit_win():
